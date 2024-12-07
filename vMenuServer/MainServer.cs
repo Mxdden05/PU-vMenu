@@ -994,7 +994,7 @@ namespace vMenuServer
             string action = $"**Action** {msg}\n";
             string field = playerName + $"**Discord ID:** {discordUserId} | <@{discordUserId}>\n" + action;
 
-            DiscordLogs.FiveMHttpRequests.SendWebhook(caller, "", DiscordLogs.FiveMHttpRequests.DiscordEmbed("Project Urban vMenu Logs", field, "Project Urban"));
+            DiscordLogs.FiveMHttpRequests.SendWebhook(caller, "", DiscordLogs.FiveMHttpRequests.DiscordEmbed("Project Urban vMenu Logs", field, "Prddoject Urban"));
         }
         #endregion
     }
