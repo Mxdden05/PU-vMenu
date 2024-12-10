@@ -45,6 +45,10 @@ namespace vMenuClient
 
                 Scale = -1;
             }
+            if (active)
+                TriggerServerEvent("LogToDiscord", "staff", "has **activated** NoClip");
+            else
+                TriggerServerEvent("LogToDiscord", "staff", "has **deactivated** NoClip");
         }
 
         internal static bool IsNoclipActive()

@@ -43,6 +43,9 @@ namespace vMenuClient.menus
 
         public static bool DontCloseMenus { get { return MenuController.PreventExitingMenu; } set { MenuController.PreventExitingMenu = value; } }
         public static bool DisableBackButton { get { return MenuController.DisableBackButton; } set { MenuController.DisableBackButton = value; } }
+
+        public MenuItem.Icon LeftIcon { get; private set; }
+
         string selectedSavedCharacterManageName = "";
         private bool isEdidtingPed = false;
         private readonly List<string> facial_expressions = new() { "mood_Normal_1", "mood_Happy_1", "mood_Angry_1", "mood_Aiming_1", "mood_Injured_1", "mood_stressed_1", "mood_smug_1", "mood_sulk_1", };
@@ -2113,16 +2116,22 @@ namespace vMenuClient.menus
             var clonePed = new MenuItem("Clone Saved Character", "This will make a clone of your saved character. It will ask you to provide a name for that character. If that name is already taken the action will be canceled.");
             var setAsDefaultPed = new MenuItem("Set As Default Character", "If you set this character as your default character, and you enable the 'Respawn As Default MP Character' option in the Misc Settings menu, then you will be set as this character whenever you (re)spawn.");
             var renameCharacter = new MenuItem("Rename Saved Character", "You can rename this saved character. If the name is already taken then the action will be canceled.");
+            var saveCurrentPedAsCharacter = new MenuItem("Update Character Clothing", "This saves your current clothing options to this character. ~r~This can not be undone!")
+            {
+                LeftIcon = MenuItem.Icon.WARNING
+            };
             var delPed = new MenuItem("Delete Saved Character", "Deletes the selected saved character. This can not be undone!")
             {
                 LeftIcon = MenuItem.Icon.WARNING
             };
+
             manageSavedCharacterMenu.AddMenuItem(spawnPed);
             manageSavedCharacterMenu.AddMenuItem(editPedBtn);
             manageSavedCharacterMenu.AddMenuItem(clonePed);
             manageSavedCharacterMenu.AddMenuItem(setCategoryBtn);
             manageSavedCharacterMenu.AddMenuItem(setAsDefaultPed);
             manageSavedCharacterMenu.AddMenuItem(renameCharacter);
+            manageSavedCharacterMenu.AddMenuItem(saveCurrentPedAsCharacter);
             manageSavedCharacterMenu.AddMenuItem(delPed);
 
             MenuController.BindMenuItem(manageSavedCharacterMenu, createCharacterMenu, editPedBtn);
@@ -2207,6 +2216,30 @@ namespace vMenuClient.menus
                                 Notify.Error("Something went wrong while renaming your character, your old character will NOT be deleted because of this.");
                             }
                         }
+                    }
+                }
+                else if (item == saveCurrentPedAsCharacter)
+                {
+                    if (saveCurrentPedAsCharacter.Label == "Are you sure")
+                    {
+                        saveCurrentPedAsCharacter.Label = "";
+                        var tmpCharacter = StorageManager.GetSavedMpCharacterData("mp_ped_" + selectedSavedCharacterManageName);
+
+                        tmpCharacter = LoadCurrentPedData(tmpCharacter);
+
+                        if (StorageManager.SaveJsonData(tmpCharacter.SaveName, JsonConvert.SerializeObject(tmpCharacter), true))
+                        {
+                            Notify.Success($"This character's clothing has been updated!");
+                            UpdateSavedPedsMenu();
+                        }
+                        else
+                        {
+                            Notify.Error("Could not update this character's clothing.");
+                        }
+                    }
+                    else
+                    {
+                        saveCurrentPedAsCharacter.Label = "Are you sure";
                     }
                 }
                 else if (item == delPed)
@@ -2655,7 +2688,25 @@ namespace vMenuClient.menus
                 }
             };
         }
+        private MultiplayerPedData LoadCurrentPedData(MultiplayerPedData character)
+        {
+            int handle = Game.PlayerPed.Handle;
+            // Drawables
+            for (int i = 0; i < 12; i++)
+            {
+                int drawable = GetPedDrawableVariation(handle, i);
+                int texture = GetPedTextureVariation(handle, i);
+                character.DrawableVariations.clothes[i] = new KeyValuePair<int, int>(drawable, texture);
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                int prop = GetPedPropIndex(handle, i);
+                int texture = GetPedPropTextureIndex(handle, i);
+                character.PropVariations.props[i] = new KeyValuePair<int, int>(prop, texture);
+            }
 
+            return character;
+        }
         /// <summary>
         /// Updates the saved peds menu.
         /// </summary>
