@@ -1108,6 +1108,7 @@ namespace vMenuClient
                             DoScreenFadeIn(500);
                             Notify.Success($"You are now spectating ~g~<C>{GetSafePlayerName(player.Name)}</C>~s~.", false, true);
                             currentlySpectatingPlayer = player.Handle;
+                            TriggerServerEvent("LogToDiscord", "staff", $"is spectating {player.Name}, server id: {player.ServerId}.");
                         }
                     }
                 }

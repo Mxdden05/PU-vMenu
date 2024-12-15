@@ -505,6 +505,7 @@ namespace vMenuClient.menus
                         if (item == fixVehicle)
                         {
                             vehicle.Repair();
+                            TriggerServerEvent("LogToDiscord", "vehOptions", "Repaired vehicle");
                         }
                         // Clean vehicle.
                         else if (item == cleanVehicle)
